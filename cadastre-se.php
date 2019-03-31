@@ -1,27 +1,39 @@
 <?php require 'pages/header.php'; ?>
 
 <div class="container">
-<h1>Cadastre-se</h1>
+<h1 class="mt-5">Cadastre-se</h1>
 <?php
     require 'classes'.DIRECTORY_SEPARATOR.'Usuarios.php';
-    $u = new Usuarios();
+    $u = new Usuarios($conn);
     if (isset($_POST['nome']) && !empty($_POST['nome'])) {
         $nome = addslashes($_POST['nome']);
         $email = addslashes($_POST['email']);
         $senha = addslashes(MD5($_POST['senha']));
         $tel = addslashes($_POST['tel']);
-        if (!empty($nome) && !empty($email) && !empty(senha)) {
-            $u->cadastrar($nome, $email, $senha, $tel);
+        
+        if (!empty($nome) && !empty($email) && !empty($senha)) {
+            if($u->cadastrar($nome, $email, $senha, $tel)){
+?><!--FECHA PHP LINHA 5-->
+            <div class="alert alert-success">
+                <strong>Parabéns!</strong> Cadastrado com sucesso. <a href="login.php" class="alert-link"> Faça o login agora!</a>
+            </div>
+<?php   
+            } else{
+?><!--FECHA PHP LINHA 19-->
+            <div class="alert alert-warning">
+                <strong>Erro!</strong> Este úsuario já existe. <a href="login.php" class="alert-link"> Faça o login agora!</a>
+            </div>
+<?php 
+            }
         } else {
-            ?>
+?><!--FECHA PHP LINHA 25-->
             <div class="alert alert-warning">
                 Preencha todos os campos
             </div>
-            <?php
+<?php
         }
     }
-
-?> 
+?> <!--FECHA PHP LINHA 26-->
     <form method="POST">
         <div class="form-group">
             <label for="nome">Nome:</label>
