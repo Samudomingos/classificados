@@ -1,9 +1,5 @@
 <?php
-
-
-
-
-?>
+require 'config.php';?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,12 +18,13 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
-    <li class="nav-item">
-        <a class="nav-link" href="#">Login <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Cadastre-se</a>
-      </li>
+      <?php if(isset($_SESSION['cLogin']) && !empty($_SESSION['cLogin'])):?>
+      <li class="nav-item"><a class="nav-link" href="meus-anuncios.php">Meus Anuncios<span class="sr-only">(current)</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="sair.php">Sair</a></li>
+      <?php else: ?>
+      <li class="nav-item"><a class="nav-link" href="login.php">Login <span class="sr-only">(current)</span></a></li>
+      <li class="nav-item"><a class="nav-link" href="cadastre-se.php">Cadastre-se</a></li>
+        <?php endif; ?>
     </ul>
   </div>
 </nav>
