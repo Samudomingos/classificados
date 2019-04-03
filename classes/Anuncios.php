@@ -7,6 +7,7 @@ Class Anuncios{
     {
         $this->conn = $conn;
     }
+    
     public function getMeusAnuncios():array
     {
         $array = array();
@@ -21,6 +22,7 @@ Class Anuncios{
         return $array;
     }
 
+    
     public function addAnuncio($titulo, $categoria, $valor, $descricao, $estado)
     {
         $sql = $this->conn->prepare("INSERT INTO anuncios SET titulo = :titulo, id_categoria = :id_categoria, id_usuario = :id_usuario, descricao = :descricao, valor = :valor, estado = :estado ");
@@ -32,7 +34,8 @@ Class Anuncios{
         $sql->bindValue(":estado",$estado);
         $sql->execute();
     }
-    public function editAnuncio($titulo, $categoria, $valor, $descricao, $estado, $id)
+    
+    public function editAnuncio($titulo, $categoria, $valor, $descricao, $estado, $fotos, $id)
     {
         $sql = $this->conn->prepare("UPDATE anuncios SET titulo = :titulo, id_categoria = :id_categoria, id_usuario = :id_usuario, descricao = :descricao, valor = :valor, estado = :estado WHERE id = :id ");
         $sql->bindValue(":titulo",$titulo);
@@ -43,6 +46,53 @@ Class Anuncios{
         $sql->bindValue(":estado",$estado);
         $sql->bindValue(":id",$id);
         $sql->execute();
+
+        if (count($fotos)>0) {
+            for ($q=0; $q<count($fotos['tmp_name']);$q++) { 
+                    $tipo = $fotos['type'][$q];
+
+                    if (in_array($tipo, array('image/jpeg','image/png'))) 
+                    {
+                      
+                        $tmpname = md5(time().rand(0, 9999)).'.jpg';
+                        move_uploaded_file($fotos['tmp_name'][$q], 'assets/images/anuncios/'.$tmpname);
+
+                        list($width_orig, $height_orig) = getimagesize('assets/images/anuncios/'.$tmpname);
+                        
+                        $ratio = $width_orig/$height_orig;
+
+                        $width =500;
+                        $height = 500;
+
+                        if ($width/$height>$ratio) {
+                            
+                            $width = $height*$ratio;
+
+                        }else {
+                            $height = $width/$ratio;
+                        }
+                        
+                        $img = imagecreatetruecolor($width, $height);
+                        if ($tipo == 'image/jpeg') {
+                            
+                            $origi = imagecreatefromjpeg('assets/images/anuncios/'.$tmpname);
+
+                        }elseif ($tipo == 'image/png'){
+                            $origi = imagecreatefrompng('assets/images/anuncios/'.$tmpname);
+                        }
+
+                        imagecopyresampled($img, $origi, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+
+                        imagejpeg($img, 'assets/images/anuncios/'.$tmpname, 80);
+
+                        $sql = $this->conn->prepare("INSERT INTO anuncios_imagens SET id_anuncio = :id_anuncio, url = :url");
+                        $sql->bindValue(":id_anuncio",$id);
+                        $sql->bindValue(":url",$tmpname);
+                        $sql->execute();
+
+                    }
+                }    
+        }
     }
 
     public function excluirAnuncio($id)
@@ -56,9 +106,11 @@ Class Anuncios{
         $sql->execute();
 
     }
+    
     public function getAnuncios($id){
 
         $array = array();
+        $arraý['fotos'] = array();
 
         $sql = $this->conn->prepare("SELECT * FROM anuncios WHERE id = :id");
         $sql->bindValue(":id",$id);  
@@ -66,12 +118,40 @@ Class Anuncios{
 
         if ($sql->rowCount()>0) {
              $array = $sql->fetch();
+        
+             $sql = $this->conn->prepare("SELECT id, url FROM anuncios_imagens WHERE  id_anuncio = :id_anuncio");
+             $sql->bindValue(":id_anuncio", $id);
+             $sql->execute();
+
+             if ($sql->rowCount()>0) {
+                 $array['fotos'] = $sql->fetchAll();
+
+             }
         }
 
         return $array;
-
     }
 
+    public function excluirFoto($id)
+    {
+    
+        $id_anuncio=0;
+
+        $sql = $this->conn->prepare("SELECT id_anuncio FROM anuncios_imagens WHERE id = :id");
+        $sql->bindValue(":id", $id);
+        $sql->execute();
+
+        if ($sql->rowCount()>0) {
+            $row = $sql->fetch();
+            $id_anuncio = $row['id_anuncio'];
+        }
+
+        $sql = $this->conn->prepare("DELETE FROM anuncios_imagens WHERE id = :id");
+        $sql->bindValue(":id",$id);
+        $sql->execute();
+
+        return $id_anuncio;
+    }
 }
 
 

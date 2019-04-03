@@ -32,7 +32,7 @@ exit;
         <tr>
             <td>
                 <?php if(!empty($anuncio['url'])): ?>
-                <img src="asset/images/anuncios/<?php echo $anuncio['url']; ?>" border="0" height="70">
+                <img src="assets/images/anuncios/<?php echo $anuncio['url']; ?>" border="0" height="70">
                 <?php else: ?>
                 <img src="assets/images/Default.png" height="70">
                 <?php endif ?>    
