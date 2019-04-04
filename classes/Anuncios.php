@@ -8,6 +8,31 @@ Class Anuncios{
         $this->conn = $conn;
     }
     
+    public function getTotalAnuncios()
+    {
+        $sql = $this->conn->query("SELECT COUNT(*) as c FROM anuncios");
+        $row = $sql->fetch();
+        return $row['c'];
+    }
+
+    public function getUltimosAnuncios($page, $perPage)
+    {
+
+        $offset = ($page - 1) * $perPage;
+
+        $array = array();
+        $sql = $this->conn->prepare("SELECT *,
+         (select anuncios_imagens.url from anuncios_imagens where anuncios_imagens.id_anuncio = anuncios.id limit 1) as url,
+         (select categorias.nome from categorias WHERE categorias.id = anuncios.id_categoria) as categoria
+           FROM anuncios ORDER BY id DESC LIMIT $offset,3");
+        $sql->execute();
+
+        if ($sql->rowCount()>0) {
+            $array = $sql->fetchAll();
+        }
+        return $array;
+    }
+
     public function getMeusAnuncios():array
     {
         $array = array();

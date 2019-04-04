@@ -7,6 +7,15 @@ Class Usuarios {
    {
         $this->conn = $conn;
    }
+
+   public function getTotalUsuarios()
+   {
+
+        $sql = $this->conn->query("SELECT COUNT(*) as c FROM usuarios");
+        $row = $sql->fetch();
+        return $row['c'];
+
+   }
     public function cadastrar($nome, $email, $senha, $tel)
     {
         $sql = $this->conn->prepare("SELECT id FROM usuarios WHERE email = :email");
