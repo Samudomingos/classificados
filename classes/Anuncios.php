@@ -137,7 +137,11 @@ Class Anuncios{
         $array = array();
         $arraý['fotos'] = array();
 
-        $sql = $this->conn->prepare("SELECT * FROM anuncios WHERE id = :id");
+        $sql = $this->conn->prepare("SELECT *,
+         (select categorias.nome from categorias WHERE categorias.id = anuncios.id_categoria) as categoria,
+         (select usuarios.telefone from usuarios WHERE usuarios.id = anuncios.id_usuario) as telefone
+         FROM anuncios WHERE id = :id");
+        
         $sql->bindValue(":id",$id);  
         $sql->execute();
 
